@@ -1,0 +1,134 @@
+---
+/**
+ * newsletter.astro
+ * Newsletter signup page
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Newsletter — Mae" description="Subscribe to get new stories delivered to your inbox.">
+  <main class="newsletter-page">
+    <div class="newsletter-page__content">
+      <header class="newsletter-page__header">
+        <h1 class="newsletter-page__title">Stay in the loop</h1>
+        <p class="newsletter-page__intro">
+          New stories every other week, plus occasional notes on the writing process. 
+          No spam, unsubscribe anytime.
+        </p>
+      </header>
+
+      <form class="newsletter-page__form" action="/api/newsletter" method="POST">
+        <div class="newsletter-page__field">
+          <label for="email" class="newsletter-page__label">Email address</label>
+          <input 
+            type="email" 
+            id="email"
+            name="email" 
+            placeholder="your@email.com" 
+            required
+            class="newsletter-page__input"
+          />
+        </div>
+        <button type="submit" class="newsletter-page__button">
+          Subscribe
+        </button>
+      </form>
+
+      <p class="newsletter-page__note">
+        You'll receive a confirmation email. Check your spam folder if you don't see it.
+      </p>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .newsletter-page {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(80px + var(--space-xl)) var(--space-lg) var(--space-xl);
+  }
+
+  .newsletter-page__content {
+    max-width: 480px;
+    text-align: center;
+  }
+
+  .newsletter-page__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .newsletter-page__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    margin-bottom: var(--space-md);
+  }
+
+  .newsletter-page__intro {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+
+  .newsletter-page__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .newsletter-page__field {
+    text-align: left;
+  }
+
+  .newsletter-page__label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+    color: var(--color-ink);
+  }
+
+  .newsletter-page__input {
+    width: 100%;
+    padding: 1em;
+    font-size: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    transition: border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .newsletter-page__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .newsletter-page__input::placeholder {
+    color: var(--color-stone);
+  }
+
+  .newsletter-page__button {
+    width: 100%;
+    padding: 1em;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    border-radius: 4px;
+    transition: background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .newsletter-page__button:hover {
+    background-color: var(--color-accent);
+  }
+
+  .newsletter-page__note {
+    margin-top: var(--space-md);
+    font-size: 0.8125rem;
+    color: var(--color-stone);
+  }
+</style>

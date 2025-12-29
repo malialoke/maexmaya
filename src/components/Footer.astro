@@ -1,0 +1,207 @@
+---
+/**
+ * Footer.astro
+ * Site footer with newsletter signup and links
+ */
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__main">
+      <div class="site-footer__brand">
+        <span class="site-footer__logo">maexmaya</span>
+        <p class="site-footer__tagline">Strange, tender, sometimes haunted.</p>
+      </div>
+
+      <div class="site-footer__newsletter">
+        <h3 class="site-footer__newsletter-title">Stay in the loop</h3>
+        <p class="site-footer__newsletter-text">
+          New stories every other week, plus behind-the-scenes notes on the writing process.
+        </p>
+        <form class="newsletter-form" action="/api/newsletter" method="POST">
+          <div class="newsletter-form__field">
+            <input 
+              type="email" 
+              name="email" 
+              placeholder="your@email.com" 
+              required
+              class="newsletter-form__input"
+            />
+            <button type="submit" class="newsletter-form__button">
+              Subscribe
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <nav class="site-footer__nav">
+        <a href="/stories">Stories</a>
+        <a href="/journal">Journal</a>
+        <a href="/about">About</a>
+        <a href="/newsletter">Newsletter</a>
+      </nav>
+
+      <div class="site-footer__meta">
+        <span class="site-footer__copyright">© {currentYear} maexmaya</span>
+        <a href="/privacy" class="site-footer__legal">Privacy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+    padding: var(--space-2xl) var(--space-lg) var(--space-lg);
+  }
+
+  .site-footer__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .site-footer__main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid rgba(250, 248, 245, 0.1);
+  }
+
+  .site-footer__brand {
+    max-width: 300px;
+  }
+
+  .site-footer__logo {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: var(--space-sm);
+  }
+
+  .site-footer__tagline {
+    font-size: 0.9375rem;
+    color: rgba(250, 248, 245, 0.6);
+    line-height: 1.6;
+  }
+
+  .site-footer__newsletter {
+    max-width: 400px;
+  }
+
+  .site-footer__newsletter-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+  }
+
+  .site-footer__newsletter-text {
+    font-size: 0.875rem;
+    color: rgba(250, 248, 245, 0.6);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+  }
+
+  .newsletter-form__field {
+    display: flex;
+    gap: var(--space-xs);
+  }
+
+  .newsletter-form__input {
+    flex: 1;
+    padding: 0.75em 1em;
+    font-size: 0.875rem;
+    background-color: rgba(250, 248, 245, 0.1);
+    border: 1px solid rgba(250, 248, 245, 0.2);
+    border-radius: 4px;
+    color: var(--color-paper);
+    transition: border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .newsletter-form__input::placeholder {
+    color: rgba(250, 248, 245, 0.4);
+  }
+
+  .newsletter-form__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .newsletter-form__button {
+    padding: 0.75em 1.5em;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+    border-radius: 4px;
+    transition: background-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .newsletter-form__button:hover {
+    background-color: #c44169;
+  }
+
+  /* Bottom section */
+  .site-footer__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-lg);
+  }
+
+  .site-footer__nav {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .site-footer__nav a {
+    font-size: 0.8125rem;
+    color: rgba(250, 248, 245, 0.6);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .site-footer__nav a:hover {
+    color: var(--color-paper);
+  }
+
+  .site-footer__meta {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 0.75rem;
+    color: rgba(250, 248, 245, 0.4);
+  }
+
+  .site-footer__legal {
+    color: rgba(250, 248, 245, 0.4);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .site-footer__legal:hover {
+    color: var(--color-paper);
+  }
+
+  @media (max-width: 768px) {
+    .site-footer__main {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .site-footer__bottom {
+      flex-direction: column;
+      gap: var(--space-md);
+      text-align: center;
+    }
+
+    .site-footer__nav {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+</style>

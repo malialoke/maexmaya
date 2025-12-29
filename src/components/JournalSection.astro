@@ -1,0 +1,251 @@
+---
+/**
+ * JournalSection.astro
+ * Displays recent journal entries in an asymmetric editorial layout
+ * 
+ * Matches the mockup's journal section with images on the right
+ */
+
+import { getCollection } from 'astro:content';
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 3 } = Astro.props;
+
+// Fetch journal entries
+const allEntries = await getCollection('journal', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+const entries = allEntries
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, limit);
+---
+
+<section class="journal-section">
+  <header class="journal-section__header">
+    <h2 class="journal-section__title">Journal</h2>
+  </header>
+
+  <div class="journal-section__content">
+    <ul class="journal-list">
+      {entries.map((entry, index) => (
+        <li class="journal-list__item" style={`--item-index: ${index}`}>
+          <a href={`/journal/${entry.slug}`} class="journal-card">
+            <div class="journal-card__text">
+              <span class="journal-card__date">
+                {entry.data.publishDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
+              <h3 class="journal-card__title">{entry.data.title}</h3>
+              <p class="journal-card__excerpt">{entry.data.excerpt}</p>
+              <span class="journal-card__link">
+                Read more
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+            {entry.data.image && (
+              <div class="journal-card__image">
+                <img src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
+              </div>
+            )}
+            {!entry.data.image && (
+              <div class="journal-card__image journal-card__image--placeholder">
+                <div class="journal-card__image-pattern"></div>
+              </div>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="journal-section__footer">
+      <a href="/journal" class="journal-section__all-link">
+        View all entries
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .journal-section {
+    padding: var(--space-2xl) 0;
+    background-color: var(--color-paper-warm);
+  }
+
+  .journal-section__header {
+    padding: 0 var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .journal-section__title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+    text-transform: uppercase;
+  }
+
+  .journal-section__content {
+    padding: 0 var(--space-lg);
+  }
+
+  .journal-list {
+    list-style: none;
+  }
+
+  .journal-list__item {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .journal-list__item:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .journal-card {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: var(--space-lg);
+    padding: var(--space-lg) 0;
+    align-items: center;
+    transition: opacity var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .journal-card:hover {
+    opacity: 0.8;
+  }
+
+  .journal-card__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .journal-card__date {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+
+  .journal-card__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+
+  .journal-card__excerpt {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+    margin-top: var(--space-xs);
+  }
+
+  .journal-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin-top: var(--space-sm);
+  }
+
+  .journal-card__link svg {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .journal-card:hover .journal-card__link svg {
+    transform: translateX(3px);
+  }
+
+  .journal-card__image {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+
+  .journal-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .journal-card:hover .journal-card__image img {
+    transform: scale(1.05);
+  }
+
+  .journal-card__image--placeholder {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-soft) 0%,
+      #e8d0c0 50%,
+      #d4c4b0 100%
+    );
+    position: relative;
+  }
+
+  .journal-card__image-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.3;
+    background-image: 
+      radial-gradient(circle at 25% 25%, var(--color-accent) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, var(--color-accent) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Footer */
+  .journal-section__footer {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+  }
+
+  .journal-section__all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .journal-section__all-link:hover {
+    color: var(--color-accent);
+  }
+
+  .journal-section__all-link svg {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .journal-section__all-link:hover svg {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 640px) {
+    .journal-card {
+      grid-template-columns: 1fr;
+    }
+
+    .journal-card__image {
+      order: -1;
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

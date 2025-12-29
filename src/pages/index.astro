@@ -1,0 +1,31 @@
+---
+/**
+ * index.astro
+ * Homepage
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import FeaturedStories from '../components/FeaturedStories.astro';
+import JournalSection from '../components/JournalSection.astro';
+---
+
+<BaseLayout title="maexmaya" showNav={false}>
+  <main>
+    <!-- Hero with GSAP animations -->
+    <Hero 
+      title="Stories from the in-between."
+      subtitle="Fiction by Mae"
+    />
+
+    <!-- Featured Stories accordion -->
+    <FeaturedStories />
+
+    <!-- Journal section -->
+    <JournalSection />
+  </main>
+</BaseLayout>
+
+<style>
+  /* Add padding for sections below fixed nav on scroll */
+</style>

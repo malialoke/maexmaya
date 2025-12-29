@@ -1,0 +1,113 @@
+---
+/**
+ * about.astro
+ * About page
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" description="About Mae, Maya, and this corner of the internet.">
+  <main class="about-page">
+    <header class="about-page__header">
+      <h1 class="about-page__title">About</h1>
+    </header>
+
+    <div class="about-page__content">
+      <div class="about-page__intro">
+        <p class="about-page__lead">
+          I'm Mae. Maya is my wife. Hence: <em>maexmaya</em>. Mae loves Maya. 
+          This is where I put the stories.
+        </p>
+      </div>
+
+      <div class="about-page__body">
+        <h2>The Stories</h2>
+        <p>
+          I write fiction that lives in the in-between spaces — the liminal, the 
+          strange, the quietly haunted. Queer love stories set in times that 
+          tried to make such love impossible. Family histories that refuse to 
+          stay buried. Moments of connection that feel almost magic, because 
+          sometimes they are.
+        </p>
+        <p>
+          New stories appear here every two weeks.
+        </p>
+
+        <h2>The Rest</h2>
+        <p>
+          By day, I design educational content — the kind that helps people 
+          learn things, not the kind that tests them on what they've memorized. 
+          By night, I write. Somewhere in between, there's Maya, two kids, and 
+          a lot of coffee.
+        </p>
+
+        <h2>Stay</h2>
+        <p>
+          Subscribe to the newsletter if you'd like these stories delivered to 
+          your inbox. Or just come back when you remember. The door's always open.
+        </p>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .about-page {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: calc(80px + var(--space-xl)) var(--space-lg) var(--space-xl);
+  }
+
+  .about-page__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .about-page__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 400;
+  }
+
+  .about-page__intro {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .about-page__lead {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+  }
+
+  .about-page__lead code {
+    font-size: 0.85em;
+    padding: 0.2em 0.4em;
+    background-color: var(--color-paper-warm);
+    border-radius: 3px;
+  }
+
+  .about-page__body {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+  }
+
+  .about-page__body h2 {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 500;
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-sm);
+    color: var(--color-ink);
+  }
+
+  .about-page__body h2:first-child {
+    margin-top: 0;
+  }
+
+  .about-page__body p {
+    color: var(--color-ink-soft);
+    margin-bottom: var(--space-md);
+  }
+</style>

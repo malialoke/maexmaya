@@ -1,0 +1,500 @@
+---
+/**
+ * FeaturedStories.astro
+ * Layered expandable cards for featured stories
+ *
+ * Layout:
+ * - Image on left with 10px padding all around
+ * - Intro card opens by default with general info
+ * - Expandable story cards that stack horizontally
+ * - Each card has +/- control and vertical title
+ * - Fixed height section that fits exactly in viewport
+ */
+
+import { getCollection } from "astro:content";
+
+interface Props {
+  limit?: number;
+  featuredOnly?: boolean;
+}
+
+const { limit = 3, featuredOnly = true } = Astro.props;
+
+// Fetch stories from content collection
+const allStories = await getCollection("stories", ({ data }) => {
+  if (import.meta.env.PROD && data.draft) return false;
+  if (featuredOnly && !data.featured) return false;
+  return true;
+});
+
+const stories = allStories
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, limit);
+---
+
+<section class="featured">
+  <div class="featured__layout">
+    <!-- Left: Image with border all around -->
+    <div class="featured__image-container">
+      <img
+        src="/images/featured-placeholder.png"
+        alt=""
+        class="featured__image"
+      />
+    </div>
+
+    <!-- Right: Expandable story cards -->
+    <div class="featured__cards" data-featured-cards>
+      <!-- Intro card (opens by default) -->
+      <article
+        class="featured__card is-expanded"
+        data-featured-card
+        data-index="intro"
+      >
+        <div class="featured__card-tab">
+          <button
+            class="featured__card-toggle"
+            data-toggle
+            aria-expanded="true"
+            aria-label="Expand introduction"
+          >
+            <span class="featured__card-icon">+</span>
+          </button>
+          <span class="featured__card-tab-title">Welcome</span>
+        </div>
+
+        <div class="featured__card-content">
+          <div class="featured__card-inner">
+            <h2 class="featured__card-title">Can I tell you a story?</h2>
+            <p class="featured__card-subtitle">
+              New fiction every two weeks. Strange, tender, sometimes haunted.
+            </p>
+            <div class="featured__card-body">
+              <p>
+                This is where I put the stories—the ones that won't leave me
+                alone until I write them down. Queer love in impossible times.
+                Family ghosts that refuse to stay buried. Moments that feel
+                almost magic, because sometimes they are.
+              </p>
+              <p>I'm Mae. Thanks for being here.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Story cards -->
+      {
+        stories.map((story, index) => (
+          <article class="featured__card" data-featured-card data-index={index}>
+            <div class="featured__card-tab">
+              <button
+                class="featured__card-toggle"
+                data-toggle
+                aria-expanded="false"
+                aria-label={`Expand ${story.data.title}`}
+              >
+                <span class="featured__card-icon">+</span>
+              </button>
+              <span class="featured__card-tab-title">{story.data.title}</span>
+            </div>
+
+            <div class="featured__card-content">
+              <div class="featured__card-inner">
+                <h2 class="featured__card-title">{story.data.title}</h2>
+                <p class="featured__card-subtitle">
+                  {story.data.tags?.join(" · ") || "Fiction"}
+                </p>
+                <div class="featured__card-body">
+                  <p>{story.data.excerpt}</p>
+                </div>
+                <a href={`/stories/${story.slug}`} class="featured__card-link">
+                  Read story →
+                </a>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+
+      <!-- Vertical label -->
+      <div class="featured__label">
+        <span>New work every two weeks</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Large branding image -->
+  <div class="featured__branding">
+    <img
+      src="/images/branding-mxm.png"
+      alt="maexmaya"
+      class="featured__branding-img"
+    />
+  </div>
+</section>
+
+<style>
+  /* ===================
+     DESKTOP STYLES
+     =================== */
+
+  .featured {
+    position: relative;
+    background-color: var(--color-paper);
+    padding: 10px;
+    /* KEY FIX: Use exact height instead of min-height */
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Layout stretches to fill space above branding */
+  .featured__layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1; /* Stretch to fill available space */
+    min-height: 400px;
+  }
+
+  /* Image container - stretches full height */
+  .featured__image-container {
+    width: 280px;
+    height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .featured__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Cards container - HORIZONTAL for desktop, full height */
+  .featured__cards {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* Individual card - HORIZONTAL layout, full height container */
+  .featured__card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    height: 100%;
+    border-left: 1px solid var(--color-border);
+    transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    flex: 0 0 50px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .featured__card.is-expanded {
+    flex: 1 1 300px;
+  }
+
+  /* Tab - full height, content aligned to TOP */
+  .featured__card-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0.5rem;
+    gap: 1rem;
+    width: 50px;
+    height: 100%;
+    flex-shrink: 0;
+    justify-content: flex-start;
+  }
+
+  .featured__card-toggle {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--color-ink);
+    background: none;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .featured__card-toggle:hover {
+    border-color: var(--color-ink);
+  }
+
+  .featured__card.is-expanded .featured__card-toggle {
+    transform: rotate(45deg);
+  }
+
+  .featured__card-tab-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 280px;
+  }
+
+  /* Content area - full height container, content aligned to TOP */
+  .featured__card-content {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    opacity: 0;
+    width: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .featured__card.is-expanded .featured__card-content {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Inner content - align to top, don't stretch */
+  .featured__card-inner {
+    padding: 2rem 2rem 2rem 1.5rem;
+  }
+
+  .featured__card-title {
+    font-family: var(--font-body);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+  }
+
+  /* Larger title for welcome/intro card */
+  .featured__card[data-index="intro"] .featured__card-title {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    line-height: 1.05;
+    margin-bottom: 0.75rem;
+  }
+
+  .featured__card-subtitle {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .featured__card-body {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--color-ink-soft);
+    overflow: hidden;
+  }
+
+  .featured__card-body p {
+    margin: 0 0 1rem 0;
+  }
+
+  .featured__card-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .featured__card-link {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink);
+    margin-top: 1rem;
+    display: inline-block;
+    transition: color 0.2s ease;
+  }
+
+  .featured__card-link:hover {
+    color: var(--color-accent);
+  }
+
+  /* Vertical label - full height, content centered */
+  .featured__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0.75rem;
+    border-left: 1px solid var(--color-border);
+    flex-shrink: 0;
+    height: 100%;
+  }
+
+  .featured__label span {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    white-space: nowrap;
+  }
+
+  /* Branding - uses margin-top: auto to push to bottom of flex container */
+  .featured__branding {
+    margin-top: auto;
+    width: 100%;
+    pointer-events: none;
+  }
+
+  .featured__branding-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ===================
+     MOBILE STYLES
+     =================== */
+
+  @media (max-width: 768px) {
+    .featured {
+      height: auto;
+      min-height: auto;
+      overflow: visible;
+      padding: 0;
+    }
+
+    .featured__layout {
+      display: flex;
+      flex-direction: column;
+      grid-template-columns: unset;
+      height: auto;
+      min-height: unset;
+      flex: none;
+      gap: 0;
+      overflow: visible;
+      max-width: none;
+    }
+
+    .featured__image-container {
+      width: 100%;
+      height: 200px;
+    }
+
+    /* Cards - VERTICAL for mobile */
+    .featured__cards {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+
+    /* Card - VERTICAL layout for mobile */
+    .featured__card {
+      flex-direction: column;
+      height: auto;
+      border-left: none;
+      border-top: 1px solid var(--color-border);
+      flex: none;
+      overflow: visible;
+    }
+
+    .featured__card.is-expanded {
+      flex: none;
+    }
+
+    /* Tab - HORIZONTAL row for mobile */
+    .featured__card-tab {
+      flex-direction: row;
+      width: 100%;
+      height: auto;
+      padding: 0.75rem 1rem;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .featured__card-tab-title {
+      writing-mode: horizontal-tb;
+      max-height: none;
+      flex: 1;
+    }
+
+    /* Content - show/hide for mobile */
+    .featured__card-content {
+      display: none;
+      width: 100%;
+      height: auto;
+      opacity: 1;
+    }
+
+    .featured__card.is-expanded .featured__card-content {
+      display: block;
+    }
+
+    .featured__card-inner {
+      padding: 0 1rem 1rem 1rem;
+    }
+
+    .featured__label {
+      writing-mode: horizontal-tb;
+      border-left: none;
+      border-top: 1px solid var(--color-border);
+      padding: 0.5rem 1rem;
+      height: auto;
+    }
+
+    /* Branding - flows naturally on mobile */
+    .featured__branding {
+      margin-top: 0;
+    }
+  }
+</style>
+
+<script>
+  function initFeaturedCards() {
+    const container = document.querySelector("[data-featured-cards]");
+    if (!container) return;
+
+    const cards = container.querySelectorAll("[data-featured-card]");
+
+    cards.forEach((card) => {
+      const toggle = card.querySelector("[data-toggle]");
+
+      if (!toggle) return;
+
+      toggle.addEventListener("click", () => {
+        const isExpanded = card.classList.contains("is-expanded");
+
+        // Close all cards
+        cards.forEach((c) => {
+          c.classList.remove("is-expanded");
+          const t = c.querySelector("[data-toggle]");
+          if (t) t.setAttribute("aria-expanded", "false");
+        });
+
+        // If this card wasn't expanded, expand it
+        if (!isExpanded) {
+          card.classList.add("is-expanded");
+          toggle.setAttribute("aria-expanded", "true");
+        }
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initFeaturedCards);
+  document.addEventListener("astro:page-load", initFeaturedCards);
+</script>

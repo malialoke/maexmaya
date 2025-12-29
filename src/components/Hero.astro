@@ -1,0 +1,213 @@
+---
+/**
+ * Hero.astro
+ * Hero section with video that crossfades to static image
+ *
+ * Features:
+ * - Intro video that plays once, then crossfades to static image
+ * - Connection-aware: skips video on slow connections
+ * - Replay button appears after video ends (50% opacity, scales on hover)
+ */
+
+interface Props {
+  backgroundImage?: string;
+  backgroundVideo?: string;
+}
+
+const {
+  backgroundImage = "/images/heroheader.png",
+  backgroundVideo = "/videos/hero-intro.mp4",
+} = Astro.props;
+---
+
+<section class="hero" data-hero>
+  <div class="hero__bg" data-hero-bg>
+    <!-- Static image is the base layer, always visible -->
+    <img data-hero-image class="hero__bg-image" src={backgroundImage} alt="" />
+    
+    <!-- Video overlays the image -->
+    <video
+      data-hero-video
+      class="hero__bg-video"
+      autoplay
+      muted
+      playsinline
+      poster={backgroundImage}
+    >
+      <source src={backgroundVideo} type="video/mp4" />
+    </video>
+  </div>
+  
+  <!-- Replay button -->
+  <button class="hero__replay" data-hero-replay aria-label="Replay video" hidden>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+      <path d="M3 3v5h5"/>
+    </svg>
+  </button>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .hero__bg {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Image is the base layer, always visible */
+  .hero__bg-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    vertical-align: bottom;
+  }
+
+  /* Video overlays the image with absolute positioning */
+  .hero__bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    vertical-align: bottom;
+  }
+
+  .hero__bg-video.is-hidden {
+    display: none;
+  }
+
+  /* Replay button - 50% opacity, responsive sizing */
+  .hero__replay {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: clamp(32px, 3vw, 44px);
+    height: clamp(32px, 3vw, 44px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(26, 24, 20, 0.6);
+    color: #faf8f5;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    z-index: 10;
+    opacity: 0.5;
+  }
+
+  .hero__replay:hover {
+    background-color: rgba(26, 24, 20, 0.85);
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  .hero__replay:active {
+    transform: scale(0.95);
+  }
+
+  .hero__replay[hidden] {
+    display: none;
+  }
+
+  .hero__replay svg {
+    width: clamp(14px, 1.5vw, 20px);
+    height: clamp(14px, 1.5vw, 20px);
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+
+  function initHero() {
+    const hero = document.querySelector("[data-hero]");
+    if (!hero) return;
+
+    const video = hero.querySelector("[data-hero-video]") as HTMLVideoElement;
+    const replayButton = hero.querySelector("[data-hero-replay]") as HTMLButtonElement;
+
+    // Check for slow connection - skip video if on 2G/slow 3G
+    const connection = (navigator as any).connection;
+    const isSlowConnection =
+      connection &&
+      (connection.effectiveType === "2g" ||
+        connection.effectiveType === "slow-2g");
+
+    if (isSlowConnection && video) {
+      // Skip video entirely on slow connections, show replay button
+      video.classList.add("is-hidden");
+      if (replayButton) {
+        replayButton.hidden = false;
+      }
+    } else if (video) {
+      // Set up video-to-image transition
+      let videoTimedOut = false;
+
+      // Timeout fallback: if video hasn't started in 3 seconds, show static image
+      const fallbackTimeout = setTimeout(() => {
+        if (video.paused || video.readyState < 2) {
+          videoTimedOut = true;
+          gsap.to(video, { 
+            opacity: 0, 
+            duration: 0.5,
+            onComplete: () => {
+              video.classList.add("is-hidden");
+              if (replayButton) {
+                replayButton.hidden = false;
+              }
+            }
+          });
+        }
+      }, 3000);
+
+      // When video ends, fade it out to reveal image underneath
+      video.addEventListener("ended", () => {
+        if (videoTimedOut) return;
+        clearTimeout(fallbackTimeout);
+
+        gsap.to(video, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          onComplete: () => {
+            video.classList.add("is-hidden");
+            if (replayButton) {
+              replayButton.hidden = false;
+            }
+          }
+        });
+      });
+
+      // Clear timeout if video starts playing
+      video.addEventListener("playing", () => {
+        if (!videoTimedOut) {
+          clearTimeout(fallbackTimeout);
+        }
+      });
+
+      // Replay button functionality
+      if (replayButton) {
+        replayButton.addEventListener("click", () => {
+          // Reset and play video
+          video.currentTime = 0;
+          video.classList.remove("is-hidden");
+          gsap.set(video, { opacity: 1 });
+          video.play();
+          
+          // Hide replay button while playing
+          replayButton.hidden = true;
+        });
+      }
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initHero);
+  document.addEventListener("astro:page-load", initHero);
+</script>

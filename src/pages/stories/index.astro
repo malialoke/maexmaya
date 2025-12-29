@@ -1,0 +1,156 @@
+---
+/**
+ * stories/index.astro
+ * Archive page listing all published stories
+ */
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Get all non-draft stories, sorted by date
+const stories = (await getCollection('stories', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+})).sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime());
+
+// Group stories by year
+const storiesByYear = stories.reduce((acc, story) => {
+  const year = story.data.publishDate.getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(story);
+  return acc;
+}, {} as Record<number, typeof stories>);
+
+const years = Object.keys(storiesByYear).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout title="Stories — Mae" description="All published stories.">
+  <main class="stories-archive">
+    <header class="stories-archive__header">
+      <h1 class="stories-archive__title">Stories</h1>
+      <p class="stories-archive__count">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</p>
+    </header>
+
+    <div class="stories-archive__content">
+      {years.map((year) => (
+        <section class="stories-archive__year">
+          <h2 class="stories-archive__year-label">{year}</h2>
+          <ul class="stories-archive__list">
+            {storiesByYear[Number(year)].map((story) => (
+              <li class="stories-archive__item">
+                <a href={`/stories/${story.slug}`} class="stories-archive__link">
+                  <span class="stories-archive__story-title">{story.data.title}</span>
+                  <span class="stories-archive__story-meta">
+                    <time datetime={story.data.publishDate.toISOString()}>
+                      {story.data.publishDate.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </time>
+                    {story.data.series && (
+                      <span class="stories-archive__series">{story.data.series}</span>
+                    )}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .stories-archive {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .stories-archive__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .stories-archive__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 400;
+    margin-bottom: var(--space-xs);
+  }
+
+  .stories-archive__count {
+    font-size: 0.875rem;
+    color: var(--color-stone);
+  }
+
+  .stories-archive__year {
+    margin-bottom: var(--space-xl);
+  }
+
+  .stories-archive__year-label {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-stone);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .stories-archive__list {
+    list-style: none;
+  }
+
+  .stories-archive__item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .stories-archive__item:last-child {
+    border-bottom: none;
+  }
+
+  .stories-archive__link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .stories-archive__link:hover {
+    color: var(--color-accent);
+  }
+
+  .stories-archive__story-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .stories-archive__story-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.8125rem;
+    color: var(--color-stone);
+    flex-shrink: 0;
+  }
+
+  .stories-archive__series {
+    font-style: italic;
+  }
+
+  .stories-archive__series::before {
+    content: '·';
+    margin-right: var(--space-sm);
+    opacity: 0.5;
+  }
+
+  @media (max-width: 600px) {
+    .stories-archive__link {
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+  }
+</style>

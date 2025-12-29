@@ -1,0 +1,271 @@
+---
+/**
+ * [...slug].astro
+ * Dynamic route for individual story pages
+ * 
+ * Renders the full story content with reading-optimized layout
+ */
+
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const stories = await getCollection('stories');
+  return stories.map((story) => ({
+    params: { slug: story.slug },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props;
+const { Content } = await story.render();
+
+// Calculate read time if not provided (rough estimate: 200 words per minute)
+const wordCount = story.body.split(/\s+/).length;
+const readTime = story.data.estimatedReadTime || Math.ceil(wordCount / 200);
+
+// Format the date
+const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<BaseLayout title={`${story.data.title} — Mae`} description={story.data.excerpt}>
+  <article class="story">
+    <header class="story__header">
+      <div class="story__meta">
+        <time datetime={story.data.publishDate.toISOString()}>{formattedDate}</time>
+        <span class="story__meta-sep">·</span>
+        <span>{readTime} min read</span>
+        {story.data.series && (
+          <>
+            <span class="story__meta-sep">·</span>
+            <span class="story__series">{story.data.series}</span>
+          </>
+        )}
+      </div>
+      
+      <h1 class="story__title">{story.data.title}</h1>
+      
+      {story.data.contentWarnings.length > 0 && (
+        <div class="story__warnings">
+          <strong>Content note:</strong> {story.data.contentWarnings.join(', ')}
+        </div>
+      )}
+    </header>
+
+    <div class="story__content prose">
+      <Content />
+    </div>
+
+    <footer class="story__footer">
+      {story.data.tags.length > 0 && (
+        <div class="story__tags">
+          {story.data.tags.map((tag) => (
+            <span class="story__tag">{tag}</span>
+          ))}
+        </div>
+      )}
+      
+      {story.data.relatedMedia.length > 0 && (
+        <div class="story__related">
+          <h2>Related</h2>
+          <ul>
+            {story.data.relatedMedia.map((media) => (
+              <li>
+                <a href={media.url} target="_blank" rel="noopener">
+                  {media.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      <nav class="story__nav">
+        <a href="/stories" class="story__back">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          All stories
+        </a>
+      </nav>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .story {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .story__header {
+    margin-bottom: var(--space-xl);
+    text-align: center;
+  }
+
+  .story__meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    font-size: 0.8125rem;
+    color: var(--color-stone);
+    margin-bottom: var(--space-md);
+  }
+
+  .story__meta-sep {
+    opacity: 0.5;
+  }
+
+  .story__series {
+    font-style: italic;
+  }
+
+  .story__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+
+  .story__warnings {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-paper-warm);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: var(--color-ink-soft);
+  }
+
+  /* Prose styling for story content */
+  .story__content {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--color-ink);
+  }
+
+  .story__content :global(p) {
+    margin-bottom: 1.5em;
+  }
+
+  .story__content :global(p:first-of-type::first-letter) {
+    font-family: var(--font-display);
+    font-size: 3.5em;
+    float: left;
+    line-height: 0.8;
+    padding-right: 0.1em;
+    padding-top: 0.1em;
+    color: var(--color-accent);
+  }
+
+  .story__content :global(h2) {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+    color: var(--color-ink);
+  }
+
+  .story__content :global(hr) {
+    border: none;
+    text-align: center;
+    margin: 2.5em 0;
+  }
+
+  .story__content :global(hr::before) {
+    content: '· · ·';
+    letter-spacing: 0.5em;
+    color: var(--color-stone);
+  }
+
+  .story__content :global(blockquote) {
+    margin: 2em 0;
+    padding-left: var(--space-md);
+    border-left: 2px solid var(--color-accent);
+    font-style: italic;
+    color: var(--color-ink-soft);
+  }
+
+  .story__content :global(em) {
+    font-style: italic;
+  }
+
+  .story__content :global(strong) {
+    font-weight: 600;
+  }
+
+  /* Footer */
+  .story__footer {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .story__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-lg);
+  }
+
+  .story__tag {
+    font-size: 0.75rem;
+    padding: 0.25em 0.75em;
+    background-color: var(--color-paper-warm);
+    border-radius: 2em;
+    color: var(--color-stone);
+  }
+
+  .story__related {
+    margin-bottom: var(--space-lg);
+  }
+
+  .story__related h2 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .story__related ul {
+    list-style: none;
+  }
+
+  .story__related a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-soft);
+    text-underline-offset: 2px;
+  }
+
+  .story__nav {
+    margin-top: var(--space-lg);
+  }
+
+  .story__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    color: var(--color-stone);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .story__back:hover {
+    color: var(--color-accent);
+  }
+
+  .story__back svg {
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .story__back:hover svg {
+    transform: translateX(-3px);
+  }
+</style>

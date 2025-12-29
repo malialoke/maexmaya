@@ -1,0 +1,37 @@
+---
+/**
+ * index.astro
+ * Homepage
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import DividerBar from '../components/DividerBar.astro';
+import FeaturedStories from '../components/FeaturedStories.astro';
+import JournalSection from '../components/JournalSection.astro';
+---
+
+<BaseLayout title="maexmaya" showNav={false}>
+  <main class="home">
+    <Hero />
+
+    <div class="content-layer">
+      <DividerBar />
+      <FeaturedStories />
+      <DividerBar />
+      <JournalSection />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .home {
+    position: relative;
+  }
+
+  .content-layer {
+    position: relative;
+    z-index: 1;
+    background-color: var(--color-paper);
+  }
+</style>
