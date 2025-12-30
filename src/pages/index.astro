@@ -6,23 +6,27 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import DividerBar from '../components/DividerBar.astro';
 import FeaturedStories from '../components/FeaturedStories.astro';
-import JournalSection from '../components/JournalSection.astro';
+import Thoughts from '../components/Thoughts.astro';
 ---
 
 <BaseLayout title="maexmaya" showNav={false}>
   <main>
     <!-- Hero with GSAP animations -->
-    <Hero 
-      title="Stories from the in-between."
-      subtitle="Fiction by Mae"
-    />
+    <Hero />
+
+        <!-- Divider bar -->
+    <DividerBar />
 
     <!-- Featured Stories accordion -->
     <FeaturedStories />
 
-    <!-- Journal section -->
-    <JournalSection />
+            <!-- Divider bar -->
+    <DividerBar />
+
+    <!-- Thoughts section -->
+    <Thoughts />
   </main>
 </BaseLayout>
 

@@ -9,6 +9,7 @@
  * - Expandable story cards that stack horizontally
  * - Each card has +/- control and vertical title
  * - Fixed height section that fits exactly in viewport
+ * - Background image with white gradient fade
  */
 
 import { getCollection } from "astro:content";
@@ -126,7 +127,7 @@ const stories = allStories
   <!-- Large branding image -->
   <div class="featured__branding">
     <img
-      src="/images/branding-mxm.png"
+      src="/images/branding-mxmdark.png"
       alt="maexmaya"
       class="featured__branding-img"
     />
@@ -142,7 +143,6 @@ const stories = allStories
     position: relative;
     background-color: var(--color-paper);
     padding: 10px;
-    /* KEY FIX: Use exact height instead of min-height */
     height: 100vh;
     height: 100svh;
     overflow: hidden;
@@ -158,7 +158,7 @@ const stories = allStories
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    flex: 1; /* Stretch to fill available space */
+    flex: 1;
     min-height: 400px;
   }
 
@@ -183,6 +183,23 @@ const stories = allStories
     height: 100%;
     overflow: hidden;
     min-width: 0;
+    background-image: url('/images/bgcrop.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  /* Gradient overlay - white fade at top, transparent at bottom */
+  .featured__cards::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* Individual card - HORIZONTAL layout, full height container */
@@ -196,6 +213,8 @@ const stories = allStories
     flex: 0 0 50px;
     min-width: 0;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
   }
 
   .featured__card.is-expanded {
@@ -343,6 +362,9 @@ const stories = allStories
     border-left: 1px solid var(--color-border);
     flex-shrink: 0;
     height: 100%;
+    position: relative;
+    z-index: 1;
+    background-color: white;
   }
 
   .featured__label span {
@@ -354,11 +376,15 @@ const stories = allStories
     white-space: nowrap;
   }
 
-  /* Branding - uses margin-top: auto to push to bottom of flex container */
+  /* Branding - absolute positioned at bottom */
   .featured__branding {
-    margin-top: auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
     pointer-events: none;
+    padding: 0 10px 10px 10px;
+    z-index: 2;
   }
 
   .featured__branding-img {
@@ -401,6 +427,11 @@ const stories = allStories
       flex-direction: column;
       height: auto;
       overflow: visible;
+      background-image: none;
+    }
+
+    .featured__cards::before {
+      display: none;
     }
 
     /* Card - VERTICAL layout for mobile */
@@ -457,9 +488,10 @@ const stories = allStories
       height: auto;
     }
 
-    /* Branding - flows naturally on mobile */
+    /* Branding - relative positioning on mobile */
     .featured__branding {
-      margin-top: 0;
+      position: relative;
+      padding: 0;
     }
   }
 </style>

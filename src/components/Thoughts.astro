@@ -1,0 +1,400 @@
+---
+/**
+ * Thoughts.astro
+ * Blog/thoughts section mirroring Featured Stories layout
+ *
+ * Layout:
+ * - Grid of post cards on left
+ * - Image on right (kiss.png)
+ * - "thoughts" branding at bottom
+ * - Mobile: image at top, cards below, branding at bottom
+ */
+
+interface Props {
+  limit?: number;
+}
+
+const { limit = 6 } = Astro.props;
+
+// Placeholder posts - replace with content collection later
+const posts = [
+  {
+    slug: "on-writing-ghosts",
+    title: "On Writing Ghosts",
+    excerpt: "Sometimes the stories that haunt us are the ones we haven't written yet. Sometimes the stories that haunt us are the ones we haven't written yet.",
+    date: new Date("2025-01-15"),
+    tags: ["writing", "process"],
+  },
+  {
+    slug: "queer-joy-in-fiction",
+    title: "Queer Joy in Fiction",
+    excerpt: "Why I write happy endings even when the world doesn't promise them. Why I write happy endings even when the world doesn't promise them.",
+    date: new Date("2025-01-08"),
+    tags: ["queer", "writing"],
+  },
+  {
+    slug: "family-stories",
+    title: "The Stories Families Tell",
+    excerpt: "Every family has myths. Some of them are even true. Every family has myths. Some of them are even true.",
+    date: new Date("2025-01-01"),
+    tags: ["family", "memoir"],
+  },
+  {
+    slug: "magic-realism",
+    title: "Finding Magic in the Mundane",
+    excerpt: "The supernatural isn't always dramatic. Sometimes it's just Tuesday.",
+    date: new Date("2024-12-20"),
+    tags: ["craft", "magic realism"],
+  },
+  {
+    slug: "first-drafts",
+    title: "In Defense of Bad First Drafts",
+    excerpt: "Perfectionism is the enemy. Write the terrible thing.",
+    date: new Date("2024-12-15"),
+    tags: ["writing", "process"],
+  },
+  {
+    slug: "reading-list-2024",
+    title: "What I Read in 2024",
+    excerpt: "Books that changed how I think about stories.",
+    date: new Date("2024-12-10"),
+    tags: ["reading", "books"],
+  },
+  {
+    slug: "dialogue-secrets",
+    title: "Dialogue That Breathes",
+    excerpt: "Real people interrupt each other. Your characters should too.",
+    date: new Date("2024-12-05"),
+    tags: ["craft", "dialogue"],
+  },
+  {
+    slug: "writing-place",
+    title: "Writing Place Into Story",
+    excerpt: "Setting isn't backdrop. It's character.",
+    date: new Date("2024-12-01"),
+    tags: ["craft", "setting"],
+  },
+];
+
+const displayPosts = posts.slice(0, limit);
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+---
+
+<section class="thoughts" id="thoughts">
+  <div class="thoughts__layout">
+    <!-- Left: Grid of post cards -->
+    <div class="thoughts__cards">
+      <div class="thoughts__grid">
+        {
+          displayPosts.map((post, index) => (
+            <article class="thoughts__card" style={`--card-index: ${index}`}>
+              <div class="thoughts__card-accent" />
+              <div class="thoughts__card-inner">
+                <time class="thoughts__card-date" datetime={post.date.toISOString()}>
+                  {formatDate(post.date)}
+                </time>
+                <h3 class="thoughts__card-title">
+                  <a href={`/thoughts/${post.slug}`}>{post.title}</a>
+                </h3>
+                <p class="thoughts__card-excerpt">{post.excerpt}</p>
+                <div class="thoughts__card-tags">
+                  {post.tags?.map((tag) => (
+                    <span class="thoughts__card-tag">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <!-- View more link -->
+      <div class="thoughts__more">
+        <a href="/thoughts" class="thoughts__more-link">View all thoughts →</a>
+      </div>
+    </div>
+
+    <!-- Right: Image -->
+    <div class="thoughts__image-container">
+      <img
+        src="/images/kiss.png"
+        alt=""
+        class="thoughts__image"
+      />
+    </div>
+  </div>
+
+  <!-- Branding at bottom -->
+  <div class="thoughts__branding">
+    <img
+      src="/images/thoughts.png"
+      alt="thoughts"
+      class="thoughts__branding-img"
+    />
+  </div>
+</section>
+
+<style>
+  /* ===================
+     DESKTOP STYLES
+     =================== */
+
+  .thoughts {
+    position: relative;
+    background-color: var(--color-paper);
+    padding: 10px;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Layout - cards on left, image on right */
+  .thoughts__layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+    min-height: 400px;
+  }
+
+  /* Cards container on left */
+.thoughts__cards {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 60vh;
+  overflow: hidden; /* Change from auto to hidden - no scrollbar */
+  padding: 1.5rem;
+}
+
+  /* Grid of cards */
+.thoughts__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  /* Remove flex: 1 so it doesn't stretch */
+}
+
+  /* Individual card - polaroid style */
+  .thoughts__card {
+    background: white;
+    border: 1px solid var(--color-border);
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .thoughts__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Colored accent bar at top */
+  .thoughts__card-accent {
+    height: 4px;
+    background-color: var(--color-accent, #e85d75);
+    width: 40px;
+    margin: 1rem 1rem 0 1rem;
+  }
+
+  .thoughts__card-inner {
+    padding: 0.75rem 1rem 1rem 1rem;
+  }
+
+  .thoughts__card-date {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-stone);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .thoughts__card-title {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  .thoughts__card-title a {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .thoughts__card-title a:hover {
+    color: var(--color-accent);
+  }
+
+  .thoughts__card-excerpt {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .thoughts__card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .thoughts__card-tag {
+    font-size: 0.5625rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-stone);
+    background: var(--color-paper);
+    padding: 0.2rem 0.4rem;
+    border-radius: 2px;
+  }
+
+  /* View more link */
+  .thoughts__more {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .thoughts__more-link {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .thoughts__more-link:hover {
+    color: var(--color-ink);
+  }
+
+  /* Image container on right - stretches full height */
+  .thoughts__image-container {
+    width: 280px;
+    height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .thoughts__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Branding - absolute positioned at bottom */
+.thoughts__branding {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  right: 300px; /* Leave space for image + gap */
+  width: auto;
+  pointer-events: none;
+  padding: 0 0 10px 0;
+  z-index: 2;
+}
+
+  .thoughts__branding-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+/* ===================
+   TABLET STYLES
+   =================== */
+
+@media (max-width: 1100px) {
+  .thoughts__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Hide cards beyond 4 on tablet */
+  .thoughts__card:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+  /* ===================
+     MOBILE STYLES
+     =================== */
+
+  @media (max-width: 768px) {
+    .thoughts {
+      height: auto;
+      min-height: auto;
+      overflow: visible;
+      padding: 0;
+    }
+
+    .thoughts__layout {
+      display: flex;
+      flex-direction: column;
+      grid-template-columns: unset;
+      height: auto;
+      min-height: unset;
+      gap: 0;
+      max-width: none;
+    }
+
+    /* Image at top on mobile */
+    .thoughts__image-container {
+      width: 100%;
+      height: 200px;
+      order: -1;
+    }
+
+    /* Cards below image */
+    .thoughts__cards {
+      padding: 1rem;
+      order: 0;
+    }
+
+    .thoughts__grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      overflow: visible;
+    }
+
+    /* Show only 3 cards on mobile */
+    .thoughts__card:nth-child(n + 4) {
+      display: none;
+    }
+
+    .thoughts__more {
+      text-align: center;
+    }
+
+    /* Branding at bottom - relative positioning */
+    .thoughts__branding {
+      position: relative;
+      padding: 0;
+      order: 1;
+    }
+  }
+
+  /* Extra small screens - show only 2 cards */
+  @media (max-width: 480px) {
+    .thoughts__card:nth-child(n + 3) {
+      display: none;
+    }
+  }
+</style>
