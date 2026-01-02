@@ -1,15 +1,6 @@
 ---
 /**
  * FeaturedStories.astro
- * Layered expandable cards for featured stories
- *
- * Layout:
- * - Image on left with 10px padding all around
- * - Intro card opens by default with general info
- * - Expandable story cards that stack horizontally
- * - Each card has +/- control and vertical title
- * - Fixed height section that fits exactly in viewport
- * - Background image with white gradient fade
  */
 
 import { getCollection } from "astro:content";
@@ -66,18 +57,12 @@ const stories = allStories
 
         <div class="featured__card-content">
           <div class="featured__card-inner">
-            <h2 class="featured__card-title">Can I tell you a story?</h2>
-            <p class="featured__card-subtitle">
-              New fiction every two weeks. Strange, tender, sometimes haunted.
-            </p>
+            <h2 class="featured__card-title">can I tell you a story?</h2>
+            <p class="featured__card-subtitle">Once upon a time, the internet was different.</p>
             <div class="featured__card-body">
-              <p>
-                This is where I put the stories—the ones that won't leave me
-                alone until I write them down. Queer love in impossible times.
-                Family ghosts that refuse to stay buried. Moments that feel
-                almost magic, because sometimes they are.
-              </p>
-              <p>I'm Mae. Thanks for being here.</p>
+              <p>Before the platforms ate everything, people built their own strange little corners of the internet. They learned HTML just to share their interests with strangers. They made art and wrote stories and had weird collections of GIFs. I miss making things for the sake of making them, not for a content calendar or engagement metrics.</p>
+              <p>I'm not interested in twisting my work to beg the algorithm for a boost or to fit into a publisher's safe marketing strategies. I write what I want to write, because I love to write. I love characters who live in the margins, who aren't usually the focus of stories.</p>
+              <p>Once upon a time, I learned to code to build fan websites and I sharpened my writing skills having strangers on LiveJournal and A03 comment on my work. This website is a kind of love letter to that older internet, a place to share what I create on my own terms for anyone who's interested in reading it.</p>
             </div>
           </div>
         </div>
@@ -119,7 +104,7 @@ const stories = allStories
 
       <!-- Vertical label -->
       <div class="featured__label">
-        <span>New work every two weeks</span>
+        <span>Featured New Releases</span>
       </div>
     </div>
   </div>
@@ -307,14 +292,16 @@ const stories = allStories
 
   /* Larger title for welcome/intro card */
   .featured__card[data-index="intro"] .featured__card-title {
-    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-family: serif;
+    text-transform: lowercase;
     line-height: 1.05;
     margin-bottom: 0.75rem;
   }
 
   .featured__card-subtitle {
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-accent);
@@ -322,8 +309,8 @@ const stories = allStories
   }
 
   .featured__card-body {
-    font-size: 0.8125rem;
-    line-height: 1.7;
+    font-size: 0.8rem;
+    line-height: 1.5;
     color: var(--color-ink-soft);
     overflow: hidden;
   }

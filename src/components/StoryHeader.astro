@@ -1,0 +1,176 @@
+---
+/**
+ * StoryHeader.astro
+ * Header bar for story pages with navigation, follow button, and dark mode toggle
+ */
+---
+
+<header class="story-header">
+  <div class="story-header__inner">
+    <a href="/" class="story-header__logo">maexmaya</a>
+    
+    <nav class="story-header__nav">
+      <a href="/stories">Stories</a>
+      <a href="/thoughts">Thoughts</a>
+      <a href="/about">About</a>
+    </nav>
+
+    <div class="story-header__actions">
+      <a href="https://bsky.app/profile/maexmaya.bsky.social" target="_blank" rel="noopener noreferrer" class="story-header__follow">
+        Follow
+      </a>
+      <button class="story-header__toggle" data-dark-toggle aria-label="Toggle dark mode">
+        <svg class="story-header__icon story-header__icon--sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="story-header__icon story-header__icon--moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .story-header {
+    height: 100px;
+    background-image: url('/images/featured-placeholder.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .story-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    mix-blend-mode: multiply;
+  }
+
+  .story-header__inner {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .story-header__logo {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-paper);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .story-header__logo:hover {
+    opacity: 0.8;
+  }
+
+  .story-header__nav {
+    display: flex;
+    gap: var(--space-md);
+  }
+
+  .story-header__nav a {
+    font-size: 0.875rem;
+    color: rgba(250, 248, 245, 0.8);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .story-header__nav a:hover {
+    color: var(--color-paper);
+  }
+
+  .story-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .story-header__follow {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.4em 1em;
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .story-header__follow:hover {
+    background-color: #c44169;
+  }
+
+  .story-header__toggle {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(250, 248, 245, 0.1);
+    border: 1px solid rgba(250, 248, 245, 0.2);
+    border-radius: 4px;
+    color: var(--color-paper);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .story-header__toggle:hover {
+    background: rgba(250, 248, 245, 0.2);
+    border-color: rgba(250, 248, 245, 0.4);
+  }
+
+  .story-header__icon--moon {
+    display: none;
+  }
+
+  :global(.dark-mode) .story-header__icon--sun {
+    display: none;
+  }
+
+  :global(.dark-mode) .story-header__icon--moon {
+    display: block;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .story-header__nav {
+      display: none;
+    }
+
+    .story-header__inner {
+      padding: 0 var(--space-md);
+    }
+  }
+</style>
+
+<script>
+  function initDarkMode() {
+    const toggle = document.querySelector('[data-dark-toggle]');
+    if (!toggle) return;
+
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark-mode');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initDarkMode);
+  document.addEventListener('astro:page-load', initDarkMode);
+</script>
