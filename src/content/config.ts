@@ -5,7 +5,6 @@
  * Stories are the primary collection for now.
  * Journal posts and other collections can be added later.
  */
-
 import { defineCollection, z } from 'astro:content';
 
 const stories = defineCollection({
@@ -13,14 +12,23 @@ const stories = defineCollection({
   schema: z.object({
     // Required fields
     title: z.string(),
-    publishDate: z.date(),
+    publishDate: z.coerce.date(),
     
     // Story metadata
-    excerpt: z.string().max(300).describe('Short teaser for accordion/cards (max 300 chars)'),
+    excerpt: z.string().max(1000).describe('Short teaser for accordion/cards (max 300 chars)'),
     
     // Display options
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
+    
+    // Story format - determines how the story renders
+    // 'prose' = standard markdown rendering (default)
+    // 'scrollytelling' = custom React component with scroll animations
+    format: z.enum(['prose', 'scrollytelling']).default('prose'),
+    
+    // For scrollytelling stories, specify which component to use
+    // This maps to a component in src/components/stories/
+    component: z.string().optional().describe('Component name for scrollytelling stories'),
     
     // Optional categorization
     series: z.string().optional().describe('If part of a connected series'),
@@ -51,7 +59,7 @@ const journal = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    publishDate: z.date(),
+    publishDate: z.coerce.date(),
     excerpt: z.string().max(200),
     draft: z.boolean().default(false),
     tags: z.array(z.string()).default([]),

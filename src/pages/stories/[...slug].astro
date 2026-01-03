@@ -3,11 +3,17 @@
  * [...slug].astro
  * Dynamic route for individual story pages
  * 
- * Renders the full story content with reading-optimized layout
+ * Supports two formats:
+ * - 'prose' (default): Standard markdown rendering with reading-optimized layout
+ * - 'scrollytelling': Custom React components with scroll-triggered animations
  */
 
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StoryHeader from '../../components/StoryHeader.astro';
+
+// Import scrollytelling components directly
+import ThankYouForYourInterest from '../../components/stories/ThankYouForYourInterest.jsx';
 
 export async function getStaticPaths() {
   const stories = await getCollection('stories');
@@ -20,8 +26,12 @@ export async function getStaticPaths() {
 const { story } = Astro.props;
 const { Content } = await story.render();
 
+// Determine format
+const isScrollytelling = story.data.format === 'scrollytelling';
+const componentName = story.data.component;
+
 // Calculate read time if not provided (rough estimate: 200 words per minute)
-const wordCount = story.body.split(/\s+/).length;
+const wordCount = story.body?.split(/\s+/).length || 0;
 const readTime = story.data.estimatedReadTime || Math.ceil(wordCount / 200);
 
 // Format the date
@@ -32,71 +42,231 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
 });
 ---
 
-<BaseLayout title={`${story.data.title} — Mae`} description={story.data.excerpt}>
-  <article class="story">
-    <header class="story__header">
-      <div class="story__meta">
+{isScrollytelling && componentName === 'ThankYouForYourInterest' ? (
+  <!-- Scrollytelling: Thank You For Your Interest -->
+  <BaseLayout 
+    title={`${story.data.title} — maexmaya`} 
+    description={story.data.excerpt} 
+    showNav={false} 
+    showFooter={false}
+  >
+    <div class="scrollytelling-header">
+      <a href="/" class="scrollytelling-header__logo">maexmaya</a>
+      <a href="/stories" class="scrollytelling-header__back">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        All stories
+      </a>
+    </div>
+    
+    <ThankYouForYourInterest client:load />
+    
+    <div class="scrollytelling-footer">
+      <div class="scrollytelling-footer__meta">
         <time datetime={story.data.publishDate.toISOString()}>{formattedDate}</time>
-        <span class="story__meta-sep">·</span>
-        <span>{readTime} min read</span>
-        {story.data.series && (
-          <>
-            <span class="story__meta-sep">·</span>
-            <span class="story__series">{story.data.series}</span>
-          </>
+        {story.data.contentWarnings.length > 0 && (
+          <span class="scrollytelling-footer__warning">
+            Content note: {story.data.contentWarnings.join(', ')}
+          </span>
         )}
       </div>
-      
-      <h1 class="story__title">{story.data.title}</h1>
-      
-      {story.data.contentWarnings.length > 0 && (
-        <div class="story__warnings">
-          <strong>Content note:</strong> {story.data.contentWarnings.join(', ')}
-        </div>
-      )}
-    </header>
-
-    <div class="story__content prose">
-      <Content />
+      <a href="/stories" class="scrollytelling-footer__back">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to all stories
+      </a>
     </div>
+  </BaseLayout>
+) : (
+  <!-- Standard prose stories use the reading-optimized layout -->
+  <BaseLayout 
+    title={`${story.data.title} — maexmaya`} 
+    description={story.data.excerpt} 
+    showNav={false} 
+    showFooter={false}
+  >
+    <StoryHeader />
+    
+    <div class="story-page">
+      <article class="story">
+        <header class="story__header">
+          <div class="story__meta">
+            <time datetime={story.data.publishDate.toISOString()}>{formattedDate}</time>
+            <span class="story__meta-sep">·</span>
+            <span>{readTime} min read</span>
+            {story.data.series && (
+              <>
+                <span class="story__meta-sep">·</span>
+                <span class="story__series">{story.data.series}</span>
+              </>
+            )}
+          </div>
+          
+          <h1 class="story__title">{story.data.title}</h1>
+          
+          {story.data.contentWarnings.length > 0 && (
+            <div class="story__warnings">
+              <strong>Content note:</strong> {story.data.contentWarnings.join(', ')}
+            </div>
+          )}
+        </header>
 
-    <footer class="story__footer">
-      {story.data.tags.length > 0 && (
-        <div class="story__tags">
-          {story.data.tags.map((tag) => (
-            <span class="story__tag">{tag}</span>
-          ))}
+        <div class="story__content prose">
+          <Content />
         </div>
-      )}
-      
-      {story.data.relatedMedia.length > 0 && (
-        <div class="story__related">
-          <h2>Related</h2>
-          <ul>
-            {story.data.relatedMedia.map((media) => (
-              <li>
-                <a href={media.url} target="_blank" rel="noopener">
-                  {media.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      
-      <nav class="story__nav">
-        <a href="/stories" class="story__back">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          All stories
-        </a>
-      </nav>
-    </footer>
-  </article>
-</BaseLayout>
+
+        <footer class="story__footer">
+          {story.data.tags.length > 0 && (
+            <div class="story__tags">
+              {story.data.tags.map((tag) => (
+                <span class="story__tag">{tag}</span>
+              ))}
+            </div>
+          )}
+          
+          {story.data.relatedMedia.length > 0 && (
+            <div class="story__related">
+              <h2>Related</h2>
+              <ul>
+                {story.data.relatedMedia.map((media) => (
+                  <li>
+                    <a href={media.url} target="_blank" rel="noopener">
+                      {media.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          <nav class="story__nav">
+            <a href="/stories" class="story__back">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              All stories
+            </a>
+          </nav>
+        </footer>
+      </article>
+    </div>
+  </BaseLayout>
+)}
 
 <style>
+  /* ========================================
+     SCROLLYTELLING HEADER & FOOTER
+     ======================================== */
+  
+  .scrollytelling-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to bottom, rgba(2, 6, 23, 0.9), transparent);
+    pointer-events: none;
+  }
+  
+  .scrollytelling-header > * {
+    pointer-events: auto;
+  }
+  
+  .scrollytelling-header__logo {
+    font-family: var(--font-display, Georgia, serif);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .scrollytelling-header__logo:hover {
+    color: white;
+  }
+  
+  .scrollytelling-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .scrollytelling-header__back:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .scrollytelling-header__back svg {
+    transition: transform 0.2s ease;
+  }
+  
+  .scrollytelling-header__back:hover svg {
+    transform: translateX(-3px);
+  }
+  
+  .scrollytelling-footer {
+    background: rgb(2, 6, 23);
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+  
+  .scrollytelling-footer__meta {
+    font-size: 0.75rem;
+    color: rgba(148, 163, 184, 0.6);
+    margin-bottom: 1.5rem;
+  }
+  
+  .scrollytelling-footer__warning {
+    display: block;
+    margin-top: 0.5rem;
+    color: rgba(248, 113, 113, 0.6);
+  }
+  
+  .scrollytelling-footer__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(148, 163, 184, 0.5);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .scrollytelling-footer__back:hover {
+    color: rgba(148, 163, 184, 0.8);
+  }
+  
+  .scrollytelling-footer__back svg {
+    transition: transform 0.2s ease;
+  }
+  
+  .scrollytelling-footer__back:hover svg {
+    transform: translateX(-3px);
+  }
+
+  /* ========================================
+     PROSE STORY STYLES
+     ======================================== */
+  
+  .story-page {
+    min-height: calc(100vh - 60px);
+    background-color: var(--color-paper);
+    transition: background-color 0.3s ease;
+  }
+
+  :global(.dark-mode) .story-page {
+    background-color: var(--color-ink);
+  }
+
   .story {
     max-width: 42rem;
     margin: 0 auto;
@@ -118,6 +288,10 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     margin-bottom: var(--space-md);
   }
 
+  :global(.dark-mode) .story__meta {
+    color: rgba(250, 248, 245, 0.5);
+  }
+
   .story__meta-sep {
     opacity: 0.5;
   }
@@ -134,6 +308,10 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     color: var(--color-ink);
   }
 
+  :global(.dark-mode) .story__title {
+    color: var(--color-paper);
+  }
+
   .story__warnings {
     margin-top: var(--space-md);
     padding: var(--space-sm) var(--space-md);
@@ -143,25 +321,23 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     color: var(--color-ink-soft);
   }
 
-  /* Prose styling for story content */
+  :global(.dark-mode) .story__warnings {
+    background-color: rgba(250, 248, 245, 0.1);
+    color: rgba(250, 248, 245, 0.7);
+  }
+
   .story__content {
     font-size: 1.0625rem;
     line-height: 1.8;
     color: var(--color-ink);
   }
 
-  .story__content :global(p) {
-    margin-bottom: 1.5em;
+  :global(.dark-mode) .story__content {
+    color: rgba(250, 248, 245, 0.9);
   }
 
-  .story__content :global(p:first-of-type::first-letter) {
-    font-family: var(--font-display);
-    font-size: 3.5em;
-    float: left;
-    line-height: 0.8;
-    padding-right: 0.1em;
-    padding-top: 0.1em;
-    color: var(--color-accent);
+  .story__content :global(p) {
+    margin-bottom: 1.5em;
   }
 
   .story__content :global(h2) {
@@ -171,6 +347,10 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     margin-top: 2.5em;
     margin-bottom: 1em;
     color: var(--color-ink);
+  }
+
+  :global(.dark-mode) .story__content :global(h2) {
+    color: var(--color-paper);
   }
 
   .story__content :global(hr) {
@@ -185,12 +365,20 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     color: var(--color-stone);
   }
 
+  :global(.dark-mode) .story__content :global(hr::before) {
+    color: rgba(250, 248, 245, 0.4);
+  }
+
   .story__content :global(blockquote) {
     margin: 2em 0;
     padding-left: var(--space-md);
     border-left: 2px solid var(--color-accent);
     font-style: italic;
     color: var(--color-ink-soft);
+  }
+
+  :global(.dark-mode) .story__content :global(blockquote) {
+    color: rgba(250, 248, 245, 0.7);
   }
 
   .story__content :global(em) {
@@ -201,11 +389,14 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     font-weight: 600;
   }
 
-  /* Footer */
   .story__footer {
     margin-top: var(--space-xl);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--color-border);
+  }
+
+  :global(.dark-mode) .story__footer {
+    border-top-color: rgba(250, 248, 245, 0.2);
   }
 
   .story__tags {
@@ -223,6 +414,11 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     color: var(--color-stone);
   }
 
+  :global(.dark-mode) .story__tag {
+    background-color: rgba(250, 248, 245, 0.1);
+    color: rgba(250, 248, 245, 0.6);
+  }
+
   .story__related {
     margin-bottom: var(--space-lg);
   }
@@ -231,6 +427,11 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     font-family: var(--font-display);
     font-size: 1rem;
     margin-bottom: var(--space-sm);
+    color: var(--color-ink);
+  }
+
+  :global(.dark-mode) .story__related h2 {
+    color: var(--color-paper);
   }
 
   .story__related ul {
@@ -255,6 +456,10 @@ const formattedDate = story.data.publishDate.toLocaleDateString('en-US', {
     font-size: 0.875rem;
     color: var(--color-stone);
     transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  :global(.dark-mode) .story__back {
+    color: rgba(250, 248, 245, 0.5);
   }
 
   .story__back:hover {

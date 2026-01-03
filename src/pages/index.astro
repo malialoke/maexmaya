@@ -12,24 +12,26 @@ import Thoughts from '../components/Thoughts.astro';
 ---
 
 <BaseLayout title="maexmaya" showNav={false}>
-  <main>
-    <!-- Hero with GSAP animations -->
+  <main class="home">
     <Hero />
 
-        <!-- Divider bar -->
-    <DividerBar />
-
-    <!-- Featured Stories accordion -->
-    <FeaturedStories />
-
-            <!-- Divider bar -->
-    <DividerBar />
-
-    <!-- Thoughts section -->
-    <Thoughts />
+    <div class="content-layer">
+      <DividerBar />
+      <FeaturedStories />
+      <DividerBar />
+      <Thoughts darkMode={true} />    
+  </div>
   </main>
 </BaseLayout>
 
 <style>
-  /* Add padding for sections below fixed nav on scroll */
+  .home {
+    position: relative;
+  }
+
+  .content-layer {
+    position: relative;
+    z-index: 1;
+    background-color: var(--color-paper);
+  }
 </style>

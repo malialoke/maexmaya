@@ -2,6 +2,7 @@
 /**
  * Thoughts.astro
  * Blog/thoughts section mirroring Featured Stories layout
+ * With dark mode support
  *
  * Layout:
  * - Grid of post cards on left
@@ -10,73 +11,26 @@
  * - Mobile: image at top, cards below, branding at bottom
  */
 
+import { getCollection } from 'astro:content';
+
 interface Props {
   limit?: number;
+  darkMode?: boolean;
 }
 
-const { limit = 6 } = Astro.props;
+const { limit = 6, darkMode = false } = Astro.props;
 
-// Placeholder posts - replace with content collection later
-const posts = [
-  {
-    slug: "on-writing-ghosts",
-    title: "On Writing Ghosts",
-    excerpt: "Sometimes the stories that haunt us are the ones we haven't written yet. Sometimes the stories that haunt us are the ones we haven't written yet.",
-    date: new Date("2025-01-15"),
-    tags: ["writing", "process"],
-  },
-  {
-    slug: "queer-joy-in-fiction",
-    title: "Queer Joy in Fiction",
-    excerpt: "Why I write happy endings even when the world doesn't promise them. Why I write happy endings even when the world doesn't promise them.",
-    date: new Date("2025-01-08"),
-    tags: ["queer", "writing"],
-  },
-  {
-    slug: "family-stories",
-    title: "The Stories Families Tell",
-    excerpt: "Every family has myths. Some of them are even true. Every family has myths. Some of them are even true.",
-    date: new Date("2025-01-01"),
-    tags: ["family", "memoir"],
-  },
-  {
-    slug: "magic-realism",
-    title: "Finding Magic in the Mundane",
-    excerpt: "The supernatural isn't always dramatic. Sometimes it's just Tuesday.",
-    date: new Date("2024-12-20"),
-    tags: ["craft", "magic realism"],
-  },
-  {
-    slug: "first-drafts",
-    title: "In Defense of Bad First Drafts",
-    excerpt: "Perfectionism is the enemy. Write the terrible thing.",
-    date: new Date("2024-12-15"),
-    tags: ["writing", "process"],
-  },
-  {
-    slug: "reading-list-2024",
-    title: "What I Read in 2024",
-    excerpt: "Books that changed how I think about stories.",
-    date: new Date("2024-12-10"),
-    tags: ["reading", "books"],
-  },
-  {
-    slug: "dialogue-secrets",
-    title: "Dialogue That Breathes",
-    excerpt: "Real people interrupt each other. Your characters should too.",
-    date: new Date("2024-12-05"),
-    tags: ["craft", "dialogue"],
-  },
-  {
-    slug: "writing-place",
-    title: "Writing Place Into Story",
-    excerpt: "Setting isn't backdrop. It's character.",
-    date: new Date("2024-12-01"),
-    tags: ["craft", "setting"],
-  },
-];
+// Fetch journal posts from content collection
+const allPosts = await getCollection('journal', ({ data }) => {
+  // Filter out drafts in production
+  if (import.meta.env.PROD && data.draft) return false;
+  return true;
+});
 
-const displayPosts = posts.slice(0, limit);
+// Sort by publish date (newest first) and limit
+const posts = allPosts
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, limit);
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -85,27 +39,29 @@ function formatDate(date: Date): string {
     year: "numeric",
   });
 }
+
+const sectionClass = darkMode ? "thoughts thoughts--dark" : "thoughts";
 ---
 
-<section class="thoughts" id="thoughts">
+<section class={sectionClass} id="thoughts">
   <div class="thoughts__layout">
     <!-- Left: Grid of post cards -->
     <div class="thoughts__cards">
       <div class="thoughts__grid">
         {
-          displayPosts.map((post, index) => (
+          posts.map((post, index) => (
             <article class="thoughts__card" style={`--card-index: ${index}`}>
               <div class="thoughts__card-accent" />
               <div class="thoughts__card-inner">
-                <time class="thoughts__card-date" datetime={post.date.toISOString()}>
-                  {formatDate(post.date)}
+                <time class="thoughts__card-date" datetime={post.data.publishDate.toISOString()}>
+                  {formatDate(post.data.publishDate)}
                 </time>
                 <h3 class="thoughts__card-title">
-                  <a href={`/thoughts/${post.slug}`}>{post.title}</a>
+                  <a href={`/journal/${post.slug}`}>{post.data.title}</a>
                 </h3>
-                <p class="thoughts__card-excerpt">{post.excerpt}</p>
+                <p class="thoughts__card-excerpt">{post.data.excerpt}</p>
                 <div class="thoughts__card-tags">
-                  {post.tags?.map((tag) => (
+                  {post.data.tags?.map((tag) => (
                     <span class="thoughts__card-tag">{tag}</span>
                   ))}
                 </div>
@@ -117,7 +73,7 @@ function formatDate(date: Date): string {
 
       <!-- View more link -->
       <div class="thoughts__more">
-        <a href="/thoughts" class="thoughts__more-link">View all thoughts →</a>
+        <a href="/journal" class="thoughts__more-link">View all thoughts →</a>
       </div>
     </div>
 
@@ -155,6 +111,12 @@ function formatDate(date: Date): string {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s ease;
+  }
+
+  /* Dark mode variant */
+  .thoughts--dark {
+    background-color: var(--color-ink);
   }
 
   /* Layout - cards on left, image on right */
@@ -170,34 +132,42 @@ function formatDate(date: Date): string {
   }
 
   /* Cards container on left */
-.thoughts__cards {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: 60vh;
-  overflow: hidden; /* Change from auto to hidden - no scrollbar */
-  padding: 1.5rem;
-}
+  .thoughts__cards {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 60vh;
+    overflow: hidden;
+    padding: 1.5rem;
+  }
 
   /* Grid of cards */
-.thoughts__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  /* Remove flex: 1 so it doesn't stretch */
-}
+  .thoughts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
 
   /* Individual card - polaroid style */
   .thoughts__card {
     background: white;
     border: 1px solid var(--color-border);
     position: relative;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .thoughts--dark .thoughts__card {
+    background: rgba(250, 248, 245, 0.05);
+    border-color: rgba(250, 248, 245, 0.1);
   }
 
   .thoughts__card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .thoughts--dark .thoughts__card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
 
   /* Colored accent bar at top */
@@ -220,6 +190,11 @@ function formatDate(date: Date): string {
     color: var(--color-stone);
     display: block;
     margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
+  }
+
+  .thoughts--dark .thoughts__card-date {
+    color: rgba(250, 248, 245, 0.5);
   }
 
   .thoughts__card-title {
@@ -238,6 +213,10 @@ function formatDate(date: Date): string {
     transition: color 0.2s ease;
   }
 
+  .thoughts--dark .thoughts__card-title a {
+    color: var(--color-paper);
+  }
+
   .thoughts__card-title a:hover {
     color: var(--color-accent);
   }
@@ -247,6 +226,11 @@ function formatDate(date: Date): string {
     line-height: 1.6;
     color: var(--color-ink-soft);
     margin: 0 0 0.75rem 0;
+    transition: color 0.3s ease;
+  }
+
+  .thoughts--dark .thoughts__card-excerpt {
+    color: rgba(250, 248, 245, 0.7);
   }
 
   .thoughts__card-tags {
@@ -264,6 +248,12 @@ function formatDate(date: Date): string {
     background: var(--color-paper);
     padding: 0.2rem 0.4rem;
     border-radius: 2px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .thoughts--dark .thoughts__card-tag {
+    background: rgba(250, 248, 245, 0.1);
+    color: rgba(250, 248, 245, 0.5);
   }
 
   /* View more link */
@@ -286,6 +276,10 @@ function formatDate(date: Date): string {
     color: var(--color-ink);
   }
 
+  .thoughts--dark .thoughts__more-link:hover {
+    color: var(--color-paper);
+  }
+
   /* Image container on right - stretches full height */
   .thoughts__image-container {
     width: 280px;
@@ -301,16 +295,16 @@ function formatDate(date: Date): string {
   }
 
   /* Branding - absolute positioned at bottom */
-.thoughts__branding {
-  position: absolute;
-  bottom: 0;
-  left: 10px;
-  right: 300px; /* Leave space for image + gap */
-  width: auto;
-  pointer-events: none;
-  padding: 0 0 10px 0;
-  z-index: 2;
-}
+  .thoughts__branding {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 300px;
+    width: auto;
+    pointer-events: none;
+    padding: 0 0 10px 0;
+    z-index: 2;
+  }
 
   .thoughts__branding-img {
     display: block;
@@ -318,20 +312,20 @@ function formatDate(date: Date): string {
     height: auto;
   }
 
-/* ===================
-   TABLET STYLES
-   =================== */
+  /* ===================
+     TABLET STYLES
+     =================== */
 
-@media (max-width: 1100px) {
-  .thoughts__grid {
-    grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 1100px) {
+    .thoughts__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Hide cards beyond 4 on tablet */
+    .thoughts__card:nth-child(n + 5) {
+      display: none;
+    }
   }
-  
-  /* Hide cards beyond 4 on tablet */
-  .thoughts__card:nth-child(n + 5) {
-    display: none;
-  }
-}
 
   /* ===================
      MOBILE STYLES
@@ -366,6 +360,8 @@ function formatDate(date: Date): string {
     .thoughts__cards {
       padding: 1rem;
       order: 0;
+      max-height: none;
+      overflow: visible;
     }
 
     .thoughts__grid {
@@ -387,6 +383,7 @@ function formatDate(date: Date): string {
     .thoughts__branding {
       position: relative;
       padding: 0;
+      right: 0;
       order: 1;
     }
   }
