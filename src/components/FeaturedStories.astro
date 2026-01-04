@@ -91,7 +91,10 @@ const stories = allStories
                   {story.data.tags?.join(" · ") || "Fiction"}
                 </p>
                 <div class="featured__card-body">
-                  <p>{story.data.excerpt}</p>
+                  <p class="accordion__synopsis">{story.data.synopsis}</p>
+<blockquote class="accordion__excerpt">
+  <em>{story.data.excerpt}</em>
+</blockquote>
                 </div>
                 <a href={`/stories/${story.slug}`} class="featured__card-link">
                   Read story →
@@ -123,6 +126,18 @@ const stories = allStories
   /* ===================
      DESKTOP STYLES
      =================== */
+
+     .accordion__synopsis {
+  margin-bottom: 1em;
+}
+
+.accordion__excerpt {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: var(--color-stone);
+}
 
   .featured {
     position: relative;

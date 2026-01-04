@@ -1,10 +1,11 @@
 ---
 title: "Mexican Halloween"
-publishDate: 2026-01-03
+publishDate: 2026-01-05
+synopsis: "Sofía paints her face like the dead and tells ghost stories for tips. The tourists want Mexican Halloween—spooky but safe. Meanwhile, ICE raids happen ten minutes away, and her cousin's daughters are asking when mom is coming home."
 excerpt: "The group passes Casa Jalapenos, which is owned by a restaurant group in Phoenix that is owned by investors in Korea. It serves margaritas in glasses the size of fishbowls and salsa that comes from a gallon jug manufactured by a subsidiary of PepsiCo. The tourists neither know nor care that this was once Mexico, before the border moved like a scar across the land. Ten minutes east, ICE raids the Home Depot parking lot where brown men wait for work in the pre-dawn dark three times a week. But here, everything is sanded down and sanitized into something safe enough to sell."
 featured: true
 draft: false
-tags: []
+tags: ["fiction", "short story"]
 contentWarnings: []
 series: ""
 ---

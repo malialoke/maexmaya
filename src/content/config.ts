@@ -15,7 +15,8 @@ const stories = defineCollection({
     publishDate: z.coerce.date(),
     
     // Story metadata
-    excerpt: z.string().max(1000).describe('Short teaser for accordion/cards (max 300 chars)'),
+    synopsis: z.string().max(300).describe('2-3 sentence teaser for the accordion'),
+    excerpt: z.string().max(1000).describe('Opening quote/hook from the story - displays as blockquote'),
     
     // Display options
     featured: z.boolean().default(false),
